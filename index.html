@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HKGI OPS public schemas</title>
+  <meta name="description" content="Public JSON Schemas for the HKGI OPS data platform.">
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1c2430;
+      --muted: #5c6778;
+      --line: #d9e0ea;
+      --paper: #f6f8fb;
+      --card: #ffffff;
+      --accent: #0b5f6b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+      line-height: 1.5;
+    }
+    main {
+      max-width: 42rem;
+      margin: 0 auto;
+      padding: 3.5rem 1.25rem 4rem;
+    }
+    header p, .card p { margin: 0.4rem 0 0; }
+    .eyebrow {
+      margin: 0;
+      color: var(--accent);
+      font-size: 0.8rem;
+      font-weight: 650;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 0.35rem 0 0;
+      font-size: 1.85rem;
+      line-height: 1.2;
+      font-weight: 650;
+    }
+    .lede { color: var(--muted); max-width: 38rem; }
+    .card {
+      margin-top: 2rem;
+      padding: 1.25rem 1.35rem 1.35rem;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+    }
+    h2 { margin: 0.7rem 0 0; font-size: 1.15rem; }
+    .meta {
+      margin: 0.75rem 0 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+    }
+    a { color: var(--accent); }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.86em;
+    }
+    .links { margin: 1rem 0 0; }
+    .links a { margin-right: 1rem; }
+    footer {
+      margin-top: 2.5rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">HKGI OPS</p>
+      <h1>Public schemas</h1>
+      <p class="lede">JSON Schemas for the OPS data platform. Each released document is served at a stable, versioned path.</p>
+    </header>
+
+    <article class="card">
+      <p class="eyebrow">1.0.0</p>
+      <h2>Dataset Submission Metadata Model</h2>
+      <p>Official metadata model for data submitters. One document describes a lifecycle event, the workflow run and job definition, participating systems, and the logical datasets consumed or produced.</p>
+      <p class="meta"><code>schemas/dataset-submission-metadata/1.0.0/schema.json</code></p>
+      <p class="links">
+        <a href="schemas/dataset-submission-metadata/1.0.0/schema.json">Schema</a>
+        <a href="schemas/catalog.json">Catalog</a>
+      </p>
+    </article>
+
+    <footer>HKGI OPS data platform</footer>
+  </main>
+</body>
+</html>

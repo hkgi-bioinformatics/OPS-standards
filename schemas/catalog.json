@@ -1,0 +1,12 @@
+{
+  "title": "HKGI OPS public schemas",
+  "schemas": [
+    {
+      "id": "https://hkgi.org/schemas/dataset-submission-metadata/1.0.0/schema.json",
+      "title": "HKGI Dataset Submission Metadata Model",
+      "version": "1.0.0",
+      "path": "schemas/dataset-submission-metadata/1.0.0/schema.json",
+      "description": "Metadata model for one lifecycle event, one workflow run, one reusable job definition, the systems participating in those activities, and the logical datasets consumed or produced."
+    }
+  ]
+}

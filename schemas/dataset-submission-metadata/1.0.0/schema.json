@@ -1,0 +1,1119 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hkgi.org/schemas/dataset-submission-metadata/1.0.0/schema.json",
+  "title": "HKGI Dataset Submission Metadata Model",
+  "description": "Official HKGI metadata model for Data Submitters. A document describes one lifecycle event, one workflow run, one reusable job definition, the systems participating in those activities, and the logical datasets consumed or produced.\n\nThe model supports composed datasets, externally registered datasets, independently represented asset manifests, bounded manifest chunks, optional GA4GH ExpMeta-aligned sequencing experiment metadata, physical laboratory materials, and optional Topup plans describing intended future derivations.\n\nA complete submission may be serialized as one JSON document. REST APIs may expose datasets, systems, manifests, manifest chunks, and other potentially large collections as independently retrievable and pageable resources.\n",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "event",
+    "run",
+    "job",
+    "systems",
+    "datasets",
+    "manifests",
+    "manifestChunks"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0.0",
+      "description": "Version of the HKGI Dataset Submission Metadata Model used by this document.\n"
+    },
+    "event": {
+      "$ref": "#/$defs/event",
+      "description": "Lifecycle transition described by this submission document.\n"
+    },
+    "run": {
+      "$ref": "#/$defs/run",
+      "description": "Particular workflow or process execution associated with the event.\n"
+    },
+    "job": {
+      "$ref": "#/$defs/job",
+      "description": "Reusable workflow or process definition executed by the run.\n"
+    },
+    "systems": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Systems referenced by the event, run, job, or datasets in this document. These may include event emitters, workflow engines, workflow registries, dataset registries, repositories, and laboratory information systems.\n",
+      "items": {
+        "$ref": "#/$defs/system"
+      }
+    },
+    "datasets": {
+      "type": "array",
+      "description": "Logical datasets described locally by this document. Event, dataset-composition, and planned-derivation relationships use stable dataset handles instead of embedding duplicate dataset representations.\n",
+      "items": {
+        "$ref": "#/$defs/dataset"
+      }
+    },
+    "manifests": {
+      "type": "array",
+      "description": "Asset manifests referenced by datasets. Manifests are separate from datasets so they can be independently stored, retrieved, paged, and validated.\n",
+      "items": {
+        "$ref": "#/$defs/manifest"
+      }
+    },
+    "manifestChunks": {
+      "type": "array",
+      "description": "Bounded chunks belonging to chunked manifests. A complete submission document may include all chunks, while a REST API may expose them as independently retrievable and pageable resources.\n",
+      "items": {
+        "$ref": "#/$defs/manifestChunk"
+      }
+    }
+  },
+  "$defs": {
+    "event": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Lifecycle transition emitted for a particular workflow or process run.\n",
+      "required": [
+        "eventId",
+        "eventType",
+        "eventTime",
+        "runId",
+        "emittingSystemId",
+        "inputs",
+        "outputs"
+      ],
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Globally unique identifier for this lifecycle event. Repeated transmission of the same logical event must use the same identifier.\n"
+        },
+        "eventType": {
+          "type": "string",
+          "enum": [
+            "START",
+            "COMPLETE",
+            "FAIL",
+            "ABORT"
+          ],
+          "description": "Lifecycle transition reported by the event.\n"
+        },
+        "eventTime": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Time at which the lifecycle transition occurred in the originating execution context. It is not the serialization, transmission, receipt, validation, or persistence time.\n"
+        },
+        "runId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Identifier of the run whose lifecycle transition is reported.\n"
+        },
+        "emittingSystemId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier of the system that created or emitted this event. The referenced system must be described in the top-level systems collection.\n"
+        },
+        "inputs": {
+          "type": "array",
+          "description": "Handles of logical datasets consumed by the run. The array is required but may be empty. A referenced dataset may be described locally or maintained in an external registry.\n",
+          "items": {
+            "$ref": "#/$defs/datasetHandle"
+          }
+        },
+        "outputs": {
+          "type": "array",
+          "description": "Handles of logical datasets created or materially modified by the run. The array is required but may be empty when no output is yet available or when the run terminated without producing an output.\n",
+          "items": {
+            "$ref": "#/$defs/datasetHandle"
+          }
+        }
+      }
+    },
+    "run": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One execution of a reusable job on an identified execution or orchestration system.\n",
+      "required": [
+        "runId",
+        "job",
+        "executionSystemId"
+      ],
+      "properties": {
+        "runId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Globally unique identifier for one execution of the job. All events describing the same execution must use the same run identifier.\n"
+        },
+        "job": {
+          "$ref": "#/$defs/jobHandle",
+          "description": "Handle of the reusable job definition executed by this run.\n"
+        },
+        "executionSystemId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier of the system that executed, orchestrated, or otherwise managed this run. The referenced system must be described in the top-level systems collection.\n"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Business, scientific, operational, or user-provided reason why this particular execution was initiated.\n"
+        },
+        "expmeta": {
+          "$ref": "#/$defs/expmeta",
+          "description": "Optional GA4GH ExpMeta-aligned sequencing experiment metadata. It is present only when the run represents or incorporates the described laboratory sequencing experiment.\n"
+        }
+      }
+    },
+    "job": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Reusable workflow, measurement procedure, analytical process, or other executable definition of which the run is one execution.\n",
+      "required": [
+        "namespace",
+        "name",
+        "operationDescription"
+      ],
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable naming domain in which the job name is unique.\n"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable identifier for the reusable workflow or process definition.\n"
+        },
+        "workflowVersion": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Version of the reusable workflow or process definition executed by the run.\n"
+        },
+        "sourceRevision": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Immutable revision of the source code or workflow definition, such as a version-control commit identifier.\n"
+        },
+        "operationDescription": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Description of the transformation, measurement, or operation inherently performed by this job, including how its inputs normally relate to its outputs.\n"
+        },
+        "definitionSystemId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier of the registry, repository, workflow service, or other system in which this reusable job definition is maintained.\n"
+        }
+      }
+    },
+    "jobHandle": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Stable handle identifying a reusable job without embedding the complete job representation.\n",
+      "required": [
+        "namespace",
+        "name"
+      ],
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Naming domain in which the job name is unique.\n"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable identifier of the reusable job within its namespace.\n"
+        }
+      }
+    },
+    "system": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Information system, workflow platform, registry, repository, laboratory system, or execution environment participating in the submission.\n",
+      "required": [
+        "systemId",
+        "name"
+      ],
+      "properties": {
+        "systemId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable identifier for the system within the HKGI metadata domain.\n"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable name of the system.\n"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "EVENT_EMITTER",
+            "WORKFLOW_ENGINE",
+            "COMPUTE_PLATFORM",
+            "WORKFLOW_REGISTRY",
+            "DATASET_REGISTRY",
+            "DATA_REPOSITORY",
+            "LABORATORY_SYSTEM",
+            "INSTRUMENT_SYSTEM",
+            "OTHER"
+          ],
+          "description": "Primary functional category of the system. A system may participate in additional roles through the properties that reference it.\n"
+        },
+        "uri": {
+          "type": "string",
+          "format": "uri",
+          "description": "Canonical or resolvable URI identifying the system or its service endpoint.\n"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable description of the system and its role.\n"
+        },
+        "organizationId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable identifier of the organisation responsible for operating or governing the system.\n"
+        }
+      }
+    },
+    "dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Logical dataset that may participate as an event input, event output, component dataset, precursor dataset, or planned derivation target. Dataset identity is independent of the event relationship through which it is referenced.\n",
+      "required": [
+        "namespace",
+        "datasetId",
+        "kind"
+      ],
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable naming domain or registry in which datasetId is unique.\n"
+        },
+        "datasetId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable identifier of the logical dataset within its namespace.\n"
+        },
+        "kind": {
+          "$ref": "#/$defs/datasetKind",
+          "description": "Broad structural form of the logical dataset, independent of its scientific meaning or storage technology.\n"
+        },
+        "registrySystemId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier of the system that governs or resolves the dataset identity. The system may be an HKGI system or an external registry described in the systems collection.\n"
+        },
+        "resolverUri": {
+          "type": "string",
+          "format": "uri-reference",
+          "description": "URI through which the dataset handle or its current metadata may be resolved.\n"
+        },
+        "dataProducer": {
+          "$ref": "#/$defs/dataProducer",
+          "description": "Organisation or facility responsible for generating the underlying scientific data represented by the dataset.\n"
+        },
+        "subjectId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Pseudonymous identifier of the biological subject from which the dataset ultimately derives.\n"
+        },
+        "sampleId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier of the biological or laboratory sample represented by the dataset.\n"
+        },
+        "libraryId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier of the prepared sequencing library represented by the dataset.\n"
+        },
+        "manifestId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Identifier of the separately represented manifest describing the physical or logical assets associated with this dataset.\n"
+        },
+        "components": {
+          "type": "array",
+          "description": "Handles of datasets logically contained, aggregated, or composed by this dataset. Composition is distinct from the asset membership represented by a manifest.\n",
+          "items": {
+            "$ref": "#/$defs/datasetHandle"
+          }
+        },
+        "topups": {
+          "type": "array",
+          "description": "Prospective processing plans associated with this dataset. A Topup describes intended future derivations and does not represent a completed run or established provenance.\n",
+          "items": {
+            "$ref": "#/$defs/topup"
+          }
+        }
+      }
+    },
+    "datasetHandle": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Stable reference to a logical dataset. The target may be described in this document or maintained in an external dataset registry.\n",
+      "required": [
+        "namespace",
+        "datasetId"
+      ],
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Naming domain or registry in which datasetId is unique.\n"
+        },
+        "datasetId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable identifier of the logical dataset within its namespace.\n"
+        },
+        "registrySystemId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier of the system that governs or resolves the referenced dataset.\n"
+        },
+        "resolverUri": {
+          "type": "string",
+          "format": "uri-reference",
+          "description": "URI through which the referenced dataset may be resolved.\n"
+        }
+      }
+    },
+    "datasetKind": {
+      "type": "string",
+      "description": "Broad structural form of a logical dataset. DATASET_COLLECTION identifies a dataset composed partly or wholly of other datasets.\n",
+      "enum": [
+        "FILE_COLLECTION",
+        "OBJECT_COLLECTION",
+        "DIRECTORY",
+        "SQL_TABLE",
+        "SQL_VIEW",
+        "SQL_QUERY_RESULT",
+        "DATABASE_SNAPSHOT",
+        "DATAFRAME",
+        "API_RESULT",
+        "REPORT_COLLECTION",
+        "DATASET_COLLECTION",
+        "LOGICAL_DATASET",
+        "OTHER"
+      ]
+    },
+    "dataProducer": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Organisation and optional facility responsible for generating the underlying scientific data.\n",
+      "required": [
+        "organizationId",
+        "organizationName"
+      ],
+      "properties": {
+        "organizationId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable identifier of the organisation responsible for generating the scientific data.\n"
+        },
+        "organizationName": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable name of the organisation.\n"
+        },
+        "facilityId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable identifier of the laboratory, sequencing centre, or facility where the scientific data was generated.\n"
+        },
+        "facilityName": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable name of the laboratory, sequencing centre, or facility.\n"
+        }
+      }
+    },
+    "topup": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Submitter-defined processing intent associated with a dataset. It groups intended derivations and their required precursor datasets. SCHEDULED instructs the processing service to run the intended derivations, while PROPOSED records the plan without requesting execution. Completion of a derivation is represented by a separate one-event submission document; the processing service does not update the status in this Topup.\n",
+      "required": [
+        "status",
+        "intendedDerivations"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "PROPOSED",
+            "SCHEDULED"
+          ],
+          "description": "Submitter intent for the Topup. PROPOSED records the intended derivations without requesting execution. SCHEDULED requests that the processing service execute them. The processing service does not write status changes back to this object.\n"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Time at which the Topup plan was created.\n"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Time after which the Topup should no longer be treated as active.\n"
+        },
+        "intendedDerivations": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Intended derivations governed by this Topup.\n",
+          "items": {
+            "$ref": "#/$defs/intendedDerivation"
+          }
+        }
+      }
+    },
+    "intendedDerivation": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "One intended derivation, identifying a controlled processing function, its precursor datasets, and the dataset handle assigned to its intended output. Each valid function is mapped by the processing service to an available workflow.\n",
+      "required": [
+        "derivationId",
+        "function",
+        "precursorDatasets",
+        "output"
+      ],
+      "properties": {
+        "derivationId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Plan key identifying this intended derivation uniquely within its containing Topup. It is not an output sample or dataset identifier.\n"
+        },
+        "function": {
+          "type": "string",
+          "enum": [
+            "FQ-MERGE"
+          ],
+          "description": "Controlled processing function requested for this derivation. Each permitted value maps to an available workflow. A function that is not explicitly listed is invalid.\n"
+        },
+        "precursorDatasets": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Handles of datasets expected to be consumed by the derivation.\n",
+          "items": {
+            "$ref": "#/$defs/datasetHandle"
+          }
+        },
+        "output": {
+          "$ref": "#/$defs/datasetHandle",
+          "description": "Handle assigned by the submitter to the dataset that the derivation is intended to produce. The referenced dataset may be absent from the top-level datasets collection until the derived data exists.\n"
+        },
+        "expectedOutputKind": {
+          "$ref": "#/$defs/datasetKind",
+          "description": "Expected structural kind of the output dataset, when known.\n"
+        }
+      }
+    },
+    "manifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Independently represented description of the physical or logical assets associated with one dataset. An inline manifest contains its complete bounded entry list. A chunked manifest uses separately represented, bounded manifest chunks.\n",
+      "required": [
+        "manifestId",
+        "representation",
+        "entryCount",
+        "totalSizeBytes",
+        "schemaVersion"
+      ],
+      "properties": {
+        "manifestId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Globally unique identifier of the manifest.\n"
+        },
+        "representation": {
+          "type": "string",
+          "enum": [
+            "inline",
+            "chunked"
+          ],
+          "description": "Whether entries are embedded in this manifest or represented through separately stored chunks.\n"
+        },
+        "entryCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of entries in the complete manifest.\n"
+        },
+        "totalSizeBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Sum of sizeBytes across all entries in the complete manifest.\n"
+        },
+        "chunkCount": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of separately represented chunks. Required when representation is chunked and prohibited when representation is inline.\n"
+        },
+        "chunksUri": {
+          "type": "string",
+          "format": "uri-reference",
+          "description": "REST resource or collection through which chunks may be retrieved.\n"
+        },
+        "mediaType": {
+          "type": "string",
+          "const": "application/vnd.hkgi.dataset-manifest+json",
+          "description": "Media type of the manifest and manifest-chunk representations.\n"
+        },
+        "schemaVersion": {
+          "type": "string",
+          "const": "1.0.0",
+          "description": "Version of the HKGI manifest representation.\n"
+        },
+        "entries": {
+          "type": "array",
+          "maxItems": 1000,
+          "description": "Complete bounded entry list. Present only for inline manifests.\n",
+          "items": {
+            "$ref": "#/$defs/manifestEntry"
+          }
+        },
+        "checksum": {
+          "$ref": "#/$defs/checksum",
+          "description": "Checksum over the canonical serialized representation of the complete manifest, not over the data assets listed by it.\n"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "representation": {
+                "const": "inline"
+              }
+            },
+            "required": [
+              "representation"
+            ]
+          },
+          "then": {
+            "required": [
+              "entries"
+            ],
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "chunkCount"
+                  ]
+                },
+                {
+                  "required": [
+                    "chunksUri"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "representation": {
+                "const": "chunked"
+              }
+            },
+            "required": [
+              "representation"
+            ]
+          },
+          "then": {
+            "required": [
+              "chunkCount"
+            ]
+          }
+        }
+      ]
+    },
+    "manifestChunk": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Bounded ordered subset of the entries belonging to a chunked manifest. Each chunk can be stored, transmitted, retried, and validated independently.\n",
+      "required": [
+        "manifestId",
+        "chunkIndex",
+        "chunkCount",
+        "entryCount",
+        "totalSizeBytes",
+        "entries"
+      ],
+      "properties": {
+        "manifestId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Identifier of the manifest to which this chunk belongs.\n"
+        },
+        "chunkIndex": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Zero-based ordinal position of this chunk within the manifest.\n"
+        },
+        "chunkCount": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Total number of chunks expected for the complete manifest.\n"
+        },
+        "entryCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000,
+          "description": "Number of manifest entries contained in this chunk.\n"
+        },
+        "totalSizeBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Sum of sizeBytes across entries contained in this chunk.\n"
+        },
+        "entries": {
+          "type": "array",
+          "maxItems": 1000,
+          "description": "Bounded ordered subset of the entries belonging to the manifest.\n",
+          "items": {
+            "$ref": "#/$defs/manifestEntry"
+          }
+        },
+        "checksum": {
+          "$ref": "#/$defs/checksum",
+          "description": "Checksum over the canonical serialized representation of this chunk, not over the data assets listed by it.\n"
+        }
+      }
+    },
+    "manifestEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Physical or logical data asset associated with a dataset. For copyable files, location identifies the source and relativePath identifies the path to preserve within the copied dataset.\n",
+      "required": [
+        "entryId",
+        "kind",
+        "sizeBytes"
+      ],
+      "properties": {
+        "entryId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier of the asset within the context of its manifest.\n"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "FILE",
+            "OBJECT",
+            "DIRECTORY",
+            "SQL_TABLE",
+            "SQL_VIEW",
+            "SQL_RESULT",
+            "PARTITION",
+            "REPORT",
+            "OTHER"
+          ],
+          "description": "Structural category of the represented asset.\n"
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Functional role played by the asset within the containing dataset.\n"
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Physical encoded size of the asset in bytes. Zero indicates that a meaningful size is unavailable or does not apply.\n"
+        },
+        "location": {
+          "type": "string",
+          "format": "uri-reference",
+          "description": "Resolvable physical or logical address from which the asset may be accessed.\n"
+        },
+        "relativePath": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$)).+$",
+          "description": "Relative path of the asset within the dataset. It must not be absolute and must not contain parent-directory traversal segments.\n"
+        },
+        "format": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Logical data format independently of compression or transport encoding.\n"
+        },
+        "compression": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Compression or encoding applied in addition to the logical format.\n"
+        },
+        "checksums": {
+          "type": "array",
+          "description": "Digests calculated from the encoded bytes of the asset.\n",
+          "items": {
+            "$ref": "#/$defs/checksum"
+          }
+        },
+        "properties": {
+          "type": "object",
+          "description": "Additional scalar properties specific to the storage or structural kind of the asset.\n",
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "integer",
+              "boolean",
+              "null"
+            ]
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "FILE"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          },
+          "then": {
+            "required": [
+              "location",
+              "relativePath"
+            ]
+          }
+        }
+      ]
+    },
+    "checksum": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "HKGI checksum structure used to identify or verify serialized metadata or encoded data content. ETAG represents a storage-system entity tag and is not necessarily a cryptographic digest.\n",
+      "required": [
+        "algorithm",
+        "value"
+      ],
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "enum": [
+            "MD5",
+            "SHA-1",
+            "SHA-256",
+            "SHA-512",
+            "CRC32C",
+            "ETAG",
+            "OTHER"
+          ],
+          "description": "Algorithm or digest convention used to calculate value.\n"
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Digest or entity-tag value produced using algorithm.\n"
+        },
+        "otherAlgorithm": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Name of the checksum algorithm when algorithm is OTHER.\n"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "algorithm": {
+                "const": "MD5"
+              }
+            },
+            "required": [
+              "algorithm"
+            ]
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "pattern": "^[0-9a-fA-F]{32}$"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "algorithm": {
+                "const": "SHA-1"
+              }
+            },
+            "required": [
+              "algorithm"
+            ]
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "pattern": "^[0-9a-fA-F]{40}$"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "algorithm": {
+                "const": "SHA-256"
+              }
+            },
+            "required": [
+              "algorithm"
+            ]
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "pattern": "^[0-9a-fA-F]{64}$"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "algorithm": {
+                "const": "SHA-512"
+              }
+            },
+            "required": [
+              "algorithm"
+            ]
+          },
+          "then": {
+            "properties": {
+              "value": {
+                "pattern": "^[0-9a-fA-F]{128}$"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "algorithm": {
+                "const": "OTHER"
+              }
+            },
+            "required": [
+              "algorithm"
+            ]
+          },
+          "then": {
+            "required": [
+              "otherAlgorithm"
+            ]
+          }
+        }
+      ]
+    },
+    "expmeta": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Run-level GA4GH ExpMeta-aligned sequencing experiment metadata. It describes experimental methodology, sequencing instrumentation, and associated physical biological or laboratory materials. It does not represent downstream analysis, access policy, or physical data files.\n",
+      "required": [
+        "version"
+      ],
+      "properties": {
+        "version": {
+          "type": "string",
+          "const": "1.0.0",
+          "description": "Version of the GA4GH ExpMeta checklist to which this representation is aligned.\n"
+        },
+        "experimentId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable identifier of the laboratory experiment.\n"
+        },
+        "sequencingRunId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier assigned by the sequencing facility or instrument system to the sequencing-machine run.\n"
+        },
+        "experimentType": {
+          "$ref": "#/$defs/term",
+          "description": "Broad ontology-based classification of the sequencing experiment.\n"
+        },
+        "assayType": {
+          "$ref": "#/$defs/term",
+          "description": "Most specific available ontology-based classification of the assay.\n"
+        },
+        "moleculeType": {
+          "$ref": "#/$defs/term",
+          "description": "Optional ontology-based classification of the molecular material sequenced.\n"
+        },
+        "designDescription": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable description of the experimental design and relevant methodological details not represented by structured properties.\n"
+        },
+        "sequencingProtocol": {
+          "type": "string",
+          "format": "uri",
+          "description": "URI identifying the protocol followed to perform the experiment.\n"
+        },
+        "libraryDescription": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Description of sequencing-library construction and characteristics.\n"
+        },
+        "libraryLayout": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": [
+                "SINGLE",
+                "PAIRED",
+                "NOT_APPLICABLE"
+              ]
+            },
+            {
+              "$ref": "#/$defs/term"
+            }
+          ],
+          "description": "Whether the library was constructed for single-end or paired-end sequencing, or an ontology term expressing the applicable layout.\n"
+        },
+        "insertSize": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Average length in base pairs of library inserts, excluding adapters.\n"
+        },
+        "physicalMaterials": {
+          "type": "array",
+          "description": "Physical biological or laboratory materials used by the experiment, including specimens, samples, aliquots, slides, extracted material, prepared libraries, and wet-laboratory vials.\n",
+          "items": {
+            "$ref": "#/$defs/physicalMaterial"
+          }
+        },
+        "instrument": {
+          "$ref": "#/$defs/instrument",
+          "description": "Instrument model and optional physical instrument used for the experiment.\n"
+        },
+        "instrumentMetadata": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Instrument configuration or execution information not represented by the structured instrument properties.\n"
+        },
+        "extensions": {
+          "$ref": "#/$defs/expmetaExtensions",
+          "description": "Experiment properties required by HKGI but not represented as core properties in this ExpMeta-aligned object.\n"
+        }
+      }
+    },
+    "physicalMaterial": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Physical biological or laboratory material participating in a sequencing experiment. This may represent a vial, specimen, sample, aliquot, slide, extracted material, or prepared sequencing library.\n",
+      "required": [
+        "namespace",
+        "materialId"
+      ],
+      "properties": {
+        "namespace": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Naming domain or laboratory system in which materialId is unique.\n"
+        },
+        "materialId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable identifier of the physical material within its namespace.\n"
+        },
+        "materialType": {
+          "$ref": "#/$defs/term",
+          "description": "Ontology-based classification of the physical material.\n"
+        },
+        "containerId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier of the vial, tube, plate position, slide, or other immediate physical container.\n"
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Role of the material within the experiment.\n"
+        }
+      }
+    },
+    "instrument": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Sequencing instrument model and optional identity of the particular physical instrument used for an experiment.\n",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/term",
+          "description": "Ontology or controlled-vocabulary term identifying the manufacturer, platform, or preferably the specific instrument model.\n"
+        },
+        "instrumentId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Facility-assigned identifier of the physical instrument.\n"
+        },
+        "softwareVersion": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Version of the instrument-control or acquisition software.\n"
+        }
+      }
+    },
+    "expmetaExtensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "HKGI sequencing experiment properties that are not represented as core properties of the ExpMeta-aligned object.\n",
+      "properties": {
+        "readLength": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Nominal number of bases intended to be produced for each read.\n"
+        },
+        "chemistry": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Sequencing chemistry or chemistry version used for the experiment.\n"
+        },
+        "reagentKit": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Identifier or name of the reagent kit used during library preparation or sequencing.\n"
+        }
+      }
+    },
+    "term": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Reference to a concept defined by an ontology or governed controlled vocabulary. The identifier carries the stable semantic identity and the label is included for human readability.\n",
+      "required": [
+        "id",
+        "label"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable ontology CURIE or governed controlled-vocabulary identifier.\n"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Human-readable label corresponding to the identified concept.\n"
+        },
+        "ontologyVersion": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Version of the ontology or controlled vocabulary.\n"
+        },
+        "uri": {
+          "type": "string",
+          "format": "uri",
+          "description": "URI resolving to or canonically identifying the concept.\n"
+        }
+      }
+    }
+  }
+}
