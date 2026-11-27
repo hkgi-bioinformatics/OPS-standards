@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hkgi-bioinformatics.github.io/OPS-standards/schemas/deploy-instance/v0.placeholder.schema.json",
+  "title": "OPS deploy-instance manifest",
+  "description": "Placeholder only. The field list is not settled. This standard is for tools that manage deploy instances through a manifest, in the same style as an MCP tool surface. The temporal worker deploy repo and the registry deploy repo will vendor this file once the fields are agreed.\n",
+  "type": "object",
+  "additionalProperties": true
+}

@@ -14,6 +14,13 @@
       "version": "1.0.0",
       "path": "schemas/build-release/v1.0.0.schema.json",
       "description": "Build-release manifest published with an OPS image. The temporal worker and the registry service will vendor this file."
+    },
+    {
+      "id": "https://hkgi-bioinformatics.github.io/OPS-standards/schemas/deploy-instance/v0.placeholder.schema.json",
+      "title": "OPS deploy-instance manifest",
+      "version": "0-placeholder",
+      "path": "schemas/deploy-instance/v0.placeholder.schema.json",
+      "description": "Placeholder only. The field list is not settled. The temporal worker deploy repo and the registry deploy repo will vendor this file once the fields are agreed."
     }
   ]
 }

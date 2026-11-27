@@ -21,6 +21,8 @@ That `$id` is the GitHub Pages URL of this file.
 
 The build-release schema is [schema version 1.0.0](schemas/build-release/v1.0.0.schema.json). It accepts the manifests the temporal worker and the registry service publish today. Those two repositories will vendor that file. This repository does not publish their images.
 
+The deploy-instance file is a [placeholder](schemas/deploy-instance/v0.placeholder.schema.json). The field list is not settled. The temporal worker deploy repo and the registry deploy repo will vendor it once the fields are agreed.
+
 ## Enable GitHub Pages
 
 After the GitHub repository exists and `main` has been pushed:
