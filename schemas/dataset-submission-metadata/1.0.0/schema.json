@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://hkgi.org/schemas/dataset-submission-metadata/1.0.0/schema.json",
+  "$id": "https://hkgi-bioinformatics.github.io/OPS-standards/schemas/dataset-submission-metadata/1.0.0/schema.json",
   "title": "HKGI Dataset Submission Metadata Model",
   "description": "Official HKGI metadata model for Data Submitters. A document describes one lifecycle event, one workflow run, one reusable job definition, the systems participating in those activities, and the logical datasets consumed or produced.\n\nThe model supports composed datasets, externally registered datasets, independently represented asset manifests, bounded manifest chunks, optional GA4GH ExpMeta-aligned sequencing experiment metadata, physical laboratory materials, and optional Topup plans describing intended future derivations.\n\nA complete submission may be serialized as one JSON document. REST APIs may expose datasets, systems, manifests, manifest chunks, and other potentially large collections as independently retrievable and pageable resources.\n",
   "type": "object",

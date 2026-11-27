@@ -13,10 +13,10 @@ A machine-readable list is at [`schemas/catalog.json`](schemas/catalog.json).
 The dataset submission schema identifies itself as:
 
 ```text
-https://hkgi.org/schemas/dataset-submission-metadata/1.0.0/schema.json
+https://hkgi-bioinformatics.github.io/OPS-standards/schemas/dataset-submission-metadata/1.0.0/schema.json
 ```
 
-That `$id` matches the file in this repository. The previous identifier used a `.yaml` suffix; the document is JSON, so the suffix is `.json`.
+That `$id` is the GitHub Pages URL of this file.
 
 ## Enable GitHub Pages
 
@@ -28,13 +28,11 @@ After the GitHub repository exists and `main` has been pushed:
 
 The workflow in `.github/workflows/pages.yml` publishes the repository root. `.nojekyll` is present so GitHub does not run Jekyll over the schema files.
 
-Until a custom domain is attached, the live URLs use the GitHub Pages host, for example:
+The live schema URL is:
 
 ```text
-https://<owner>.github.io/<repository>/schemas/dataset-submission-metadata/1.0.0/schema.json
+https://hkgi-bioinformatics.github.io/OPS-standards/schemas/dataset-submission-metadata/1.0.0/schema.json
 ```
-
-The schema `$id` uses `https://hkgi.org/...`. Those two hosts agree only after `hkgi.org` (or a path on it) serves this site. Add a `CNAME` file here only if this Pages site should be the site for that hostname. If `hkgi.org` already has another site, proxy `/schemas/` to Pages instead of claiming the whole domain.
 
 ## Add a schema version
 
