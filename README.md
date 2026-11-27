@@ -7,6 +7,7 @@ Static site for the public JSON Schemas of the HKGI OPS data platform. GitHub Pa
 | Schema | Version | Path |
 | --- | --- | --- |
 | HKGI Dataset Submission Metadata Model | 1.0.0 | [`schemas/dataset-submission-metadata/1.0.0/schema.json`](schemas/dataset-submission-metadata/1.0.0/schema.json) |
+| OPS build-release manifest | 1.0.0 | [`schemas/build-release/v1.0.0.schema.json`](schemas/build-release/v1.0.0.schema.json) |
 
 A machine-readable list is at [`schemas/catalog.json`](schemas/catalog.json).
 
@@ -17,6 +18,8 @@ https://hkgi-bioinformatics.github.io/OPS-standards/schemas/dataset-submission-m
 ```
 
 That `$id` is the GitHub Pages URL of this file.
+
+The build-release schema is [schema version 1.0.0](schemas/build-release/v1.0.0.schema.json). It accepts the manifests the temporal worker and the registry service publish today. Those two repositories will vendor that file. This repository does not publish their images.
 
 ## Enable GitHub Pages
 

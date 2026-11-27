@@ -1,0 +1,356 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hkgi-bioinformatics.github.io/OPS-standards/schemas/build-release/v1.0.0.schema.json",
+  "title": "OPS build-release manifest",
+  "description": "Schema version 1.0.0 for the build-release manifest published with an OPS image. A document from the temporal worker or the registry service must validate. The temporal worker and the registry service will vendor this file.\n",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "id",
+    "version",
+    "build",
+    "container",
+    "storage_version_key"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL of the schema used when the manifest was written.\n"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Release identifier.\n"
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Product version of the published component.\n"
+    },
+    "storage_version_key": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Object-storage prefix for this release.\n"
+    },
+    "build": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "run_id",
+        "source_environment",
+        "source"
+      ],
+      "properties": {
+        "timestamp": {
+          "type": "string",
+          "minLength": 1,
+          "description": "UTC time when the manifest was built.\n"
+        },
+        "run_id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "CI run that published this release.\n"
+        },
+        "source_environment": {
+          "type": "string",
+          "minLength": 1
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Build version, distinct from the product version.\n"
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "repository",
+            "ref",
+            "sha"
+          ],
+          "properties": {
+            "repository": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Git repository that was built.\n"
+            },
+            "ref": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Git ref that was built.\n"
+            },
+            "sha": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Git commit that was built.\n"
+            }
+          }
+        }
+      }
+    },
+    "container": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "image",
+        "digest",
+        "tags"
+      ],
+      "properties": {
+        "image": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Image reference published for this release.\n"
+        },
+        "digest": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tags": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schema_bundle": {
+          "$ref": "#/$defs/artifactPin"
+        },
+        "docs_bundle": {
+          "$ref": "#/$defs/artifactPin"
+        },
+        "pytest_summary": {
+          "$ref": "#/$defs/artifactPin"
+        },
+        "go_clients": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {
+            "$ref": "#/$defs/artifactPin"
+          }
+        },
+        "sbom": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "cyclonedx": {
+              "$ref": "#/$defs/artifactPin"
+            },
+            "spdx": {
+              "$ref": "#/$defs/artifactPin"
+            }
+          }
+        }
+      }
+    },
+    "config_contracts": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/artifactPin"
+      }
+    },
+    "db_schema_version": {
+      "type": "string"
+    },
+    "sdk_version": {
+      "type": ["string", "null"]
+    },
+    "clients": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "index",
+        "sdk_versions",
+        "cli_version",
+        "api_support",
+        "cli_api_support",
+        "artifacts"
+      ],
+      "properties": {
+        "index": {
+          "$ref": "#/$defs/clientRef"
+        },
+        "sdk_versions": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["go", "python"],
+          "properties": {
+            "go": {
+              "type": "string",
+              "minLength": 1
+            },
+            "python": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        },
+        "cli_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "cli_api_support": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^(registry|drs)-api"
+          }
+        },
+        "api_support": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "public_major_version",
+              "contract_version",
+              "spec_sha256"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "public_major_version": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "contract_version": {
+                "type": "string"
+              },
+              "spec_sha256": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$"
+              }
+            }
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "version", "filename", "key", "url", "sha256"],
+            "properties": {
+              "name": {
+                "enum": [
+                  "go_sdk",
+                  "python_wheel",
+                  "python_sdist",
+                  "cli_linux",
+                  "cli_windows"
+                ]
+              },
+              "version": {
+                "type": "string",
+                "minLength": 1
+              },
+              "filename": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9_+.-]+$"
+              },
+              "key": {
+                "type": "string",
+                "pattern": "^ops-registry/clients/"
+              },
+              "url": {
+                "type": "string",
+                "pattern": "^s3://"
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^sha256:[a-f0-9]{64}$"
+              },
+              "platform": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["os", "arch", "minimum_os"],
+                "properties": {
+                  "os": {
+                    "enum": ["linux", "windows"]
+                  },
+                  "arch": {
+                    "const": "amd64"
+                  },
+                  "minimum_os": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "promoted_to": {
+      "type": "string",
+      "minLength": 1
+    },
+    "apis": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": ["name", "openapi"],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "openapi": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "artifactPin": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["url"],
+      "properties": {
+        "url": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string"
+        }
+      }
+    },
+    "clientRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url", "sha256"],
+      "properties": {
+        "url": {
+          "type": "string",
+          "pattern": "^s3://"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      }
+    }
+  }
+}

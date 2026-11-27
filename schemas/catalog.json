@@ -7,6 +7,13 @@
       "version": "1.0.0",
       "path": "schemas/dataset-submission-metadata/1.0.0/schema.json",
       "description": "Metadata model for one lifecycle event, one workflow run, one reusable job definition, the systems participating in those activities, and the logical datasets consumed or produced."
+    },
+    {
+      "id": "https://hkgi-bioinformatics.github.io/OPS-standards/schemas/build-release/v1.0.0.schema.json",
+      "title": "OPS build-release manifest",
+      "version": "1.0.0",
+      "path": "schemas/build-release/v1.0.0.schema.json",
+      "description": "Build-release manifest published with an OPS image. The temporal worker and the registry service will vendor this file."
     }
   ]
 }
